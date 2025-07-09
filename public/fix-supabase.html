@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Supabase Image Access</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+        .success {
+            background: #10b981;
+        }
+        .danger {
+            background: #ef4444;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .instructions {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Supabase Image Access</h1>
+        <p>This tool will help diagnose and fix image access issues with your Supabase storage.</p>
+        
+        <div class="instructions">
+            <h3>📝 Manual Steps Required:</h3>
+            <ol>
+                <li>Go to <a href="https://supabase.com/dashboard" target="_blank">Supabase Dashboard</a></li>
+                <li>Navigate to <strong>Storage → product-images</strong></li>
+                <li>Click <strong>Settings</strong></li>
+                <li>Enable <strong>"Public bucket"</strong></li>
+                <li>Go to <strong>Authentication → Policies</strong></li>
+                <li>Create a policy for <strong>storage.objects</strong> table:
+                    <ul>
+                        <li>Policy name: "Public Access"</li>
+                        <li>Table: storage.objects</li>
+                        <li>Operation: SELECT</li>
+                        <li>Target roles: public</li>
+                        <li>USING expression: <code>bucket_id = 'product-images'</code></li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div>
+            <button class="button" onclick="testImageAccess()">🧪 Test Image Access</button>
+            <button class="button" onclick="listImages()">📋 List Images</button>
+            <button class="button" onclick="generateUrls()">🔗 Generate URLs</button>
+            <button class="button danger" onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+
+        <div id="log" class="log">Click a button above to start testing...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase
+        const supabaseUrl = 'https://fotcjsmnerawpqzhldhq.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdGNqc21uZXJhd3BxemhsZGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU3NDcyOTcsImV4cCI6MjA1MTMyMzI5N30.Ej7Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const BUCKET_NAME = 'product-images';
+
+        function log(message) {
+            const logElement = document.getElementById('log');
+            logElement.textContent += new Date().toLocaleTimeString() + ' - ' + message + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+
+        async function testImageAccess() {
+            log('🧪 Starting image access test...');
+            
+            try {
+                // Test bucket access
+                log('📁 Testing bucket access...');
+                const { data: files, error } = await supabase.storage
+                    .from(BUCKET_NAME)
+                    .list('products', { limit: 5 });
+                
+                if (error) {
+                    log('❌ Bucket access failed: ' + error.message);
+                    log('💡 Solution: Make sure the bucket is public in Supabase dashboard');
+                    return;
+                }
+                
+                log(`✅ Bucket accessible. Found ${files.length} files`);
+                
+                // Test image URLs
+                if (files.length > 0) {
+                    log('🔗 Testing image URLs...');
+                    
+                    for (let i = 0; i < Math.min(3, files.length); i++) {
+                        const file = files[i];
+                        const { data } = supabase.storage
+                            .from(BUCKET_NAME)
+                            .getPublicUrl(`products/${file.name}`);
+                        
+                        const publicUrl = data.publicUrl;
+                        
+                        try {
+                            const response = await fetch(publicUrl, { method: 'HEAD' });
+                            const accessible = response.ok;
+                            
+                            log(`${accessible ? '✅' : '❌'} ${file.name}: ${response.status} ${response.statusText}`);
+                            
+                            if (!accessible) {
+                                log(`   URL: ${publicUrl}`);
+                            }
+                            
+                        } catch (fetchError) {
+                            log(`❌ ${file.name}: Network error - ${fetchError.message}`);
+                        }
+                    }
+                } else {
+                    log('⚠️ No files found in bucket');
+                }
+                
+                log('✅ Image access test completed');
+                
+            } catch (error) {
+                log('❌ Test failed: ' + error.message);
+            }
+        }
+
+        async function listImages() {
+            log('📋 Listing all images...');
+            
+            try {
+                const { data: files, error } = await supabase.storage
+                    .from(BUCKET_NAME)
+                    .list('products', { limit: 100 });
+                
+                if (error) {
+                    log('❌ Failed to list images: ' + error.message);
+                    return;
+                }
+                
+                log(`📁 Found ${files.length} images:`);
+                files.forEach((file, index) => {
+                    log(`   ${index + 1}. ${file.name} (${(file.metadata?.size || 0 / 1024).toFixed(1)} KB)`);
+                });
+                
+            } catch (error) {
+                log('❌ Error listing images: ' + error.message);
+            }
+        }
+
+        async function generateUrls() {
+            log('🔗 Generating image URLs...');
+            
+            try {
+                const { data: files, error } = await supabase.storage
+                    .from(BUCKET_NAME)
+                    .list('products', { limit: 100 });
+                
+                if (error) {
+                    log('❌ Failed to list images: ' + error.message);
+                    return;
+                }
+                
+                log(`🔗 Generated URLs for ${files.length} images:`);
+                
+                const urls = {};
+                files.forEach(file => {
+                    const { data } = supabase.storage
+                        .from(BUCKET_NAME)
+                        .getPublicUrl(`products/${file.name}`);
+                    
+                    urls[file.name] = data.publicUrl;
+                    log(`   ${file.name}: ${data.publicUrl}`);
+                });
+                
+                // Copy to clipboard
+                const urlsJson = JSON.stringify(urls, null, 2);
+                navigator.clipboard.writeText(urlsJson).then(() => {
+                    log('📋 URLs copied to clipboard!');
+                }).catch(() => {
+                    log('⚠️ Could not copy to clipboard');
+                });
+                
+            } catch (error) {
+                log('❌ Error generating URLs: ' + error.message);
+            }
+        }
+
+        // Auto-run test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testImageAccess, 1000);
+        });
+    </script>
+</body>
+</html>
