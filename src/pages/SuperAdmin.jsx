@@ -34,57 +34,35 @@ const SuperAdmin = () => {
   const loadImages = async () => {
     try {
       setLoadingImages(true);
-      console.log('🔄 Loading ALL WEBSITE images from Supabase products folder...');
+      console.log('🔄 Loading ALL products from Firebase...');
 
-      const { default: supabaseService } = await import('../services/supabase');
+      const { default: productService } = await import('../services/productService');
 
-      // Load images from the products folder
-      const imageList = await supabaseService.listImages('products');
+      // Load products from Firebase
+      const products = await productService.getAllProducts();
 
-      if (imageList && imageList.length > 0) {
-        // Load images with metadata from Firebase (admin-added data only)
-        const imagesWithUrls = await Promise.all(imageList.map(async (image) => {
-          const publicUrl = supabaseService.getPublicUrl(`products/${image.name}`);
-
-          // Try to load metadata from Firebase
-          let metadata = null;
-          try {
-            metadata = await firebaseMetadataService.getImageMetadata(image.name);
-          } catch (error) {
-            console.log(`No Firebase metadata for ${image.name}`);
-          }
-
-          // ONLY use admin-added metadata from Firebase - NO automatic generation
-          const finalMetadata = metadata ? {
-            title: metadata.title || '',
-            description: metadata.description || '',
-            category: metadata.category || '',
-            price: metadata.price || null,
-            inStock: metadata.in_stock !== undefined ? metadata.in_stock : false,
-            featured: metadata.featured || false,
-            hasMetadata: true
-          } : {
-            // NO automatic data generation - empty metadata for admin to fill
-            title: '',
-            description: '',
-            category: '',
-            price: null,
-            inStock: false,
-            featured: false,
-            hasMetadata: false
-          };
+      if (products && products.length > 0) {
+        // Convert products to image format for compatibility
+        const imagesWithUrls = products.map((product) => {
+          const publicUrl = product.image;
 
           return {
-            ...image,
-            id: image.name.replace(/\.[^/.]+$/, ""), // Remove file extension for ID
+            id: product.id,
+            name: product.title || 'Untitled',
             publicUrl,
-            fullPath: `products/${image.name}`,
-            ...finalMetadata
+            fullPath: publicUrl,
+            title: product.title || '',
+            description: product.description || '',
+            category: product.category || '',
+            price: product.price || null,
+            inStock: product.in_stock !== false,
+            featured: product.featured || false,
+            hasMetadata: true
           };
-        }));
+        });
 
         setImages(imagesWithUrls);
-        console.log(`✅ Loaded ${imagesWithUrls.length} WEBSITE images from Supabase products folder`);
+        console.log(`✅ Loaded ${imagesWithUrls.length} products from Firebase`);
 
         // Count images with and without metadata
         const withMetadata = imagesWithUrls.filter(img => img.hasMetadata).length;
@@ -123,13 +101,13 @@ const SuperAdmin = () => {
       setUploading(true);
       console.log('📤 Uploading image to Vercel Blob storage...');
 
-      const { default: supabaseService } = await import('../services/supabase');
+      const { default: productService } = await import('../services/productService');
 
       // Upload to products folder specifically
       const fileName = `${Date.now()}-${file.name}`;
       const filePath = `products/${fileName}`;
 
-      const result = await supabaseService.uploadImage(file, filePath);
+      const result = await productService.uploadImage(file, filePath);
 
       console.log('✅ Image uploaded successfully to Vercel Blob:', result.url);
 
@@ -159,12 +137,19 @@ const SuperAdmin = () => {
     }
 
     try {
-      console.log('🗑️ Deleting image from Supabase...');
+      console.log('🗑️ Deleting product from Firebase...');
 
-      const { default: supabaseService } = await import('../services/supabase');
-      await supabaseService.deleteImage(image.fullPath);
+      const { default: productService } = await import('../services/productService');
 
-      console.log('✅ Image deleted successfully from Supabase storage');
+      // Delete from Firebase
+      await productService.deleteProduct(image.id);
+
+      // Delete image from Vercel Blob if it exists
+      if (image.fullPath) {
+        await productService.deleteImage(image.fullPath);
+      }
+
+      console.log('✅ Product deleted successfully from Firebase and Vercel Blob');
 
       // Trigger refresh across all pages
       await loadImages(); // Refresh SuperAdmin first

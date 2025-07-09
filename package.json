@@ -15,8 +15,6 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "@supabase/postgrest-js": "^1.19.4",
-    "@supabase/supabase-js": "^2.49.8",
     "@vercel/blob": "^0.15.1",
     "@vitejs/plugin-react": "^4.5.0",
     "firebase": "^11.8.1",

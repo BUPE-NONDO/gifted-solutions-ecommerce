@@ -1,17 +1,18 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
   where,
-  serverTimestamp 
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from './firebase';
+import { vercelBlobService } from './vercelBlobService';
 
 export const productService = {
   // Get all products
@@ -243,6 +244,62 @@ export const productService = {
       console.error('Error seeding products:', error);
       throw error;
     }
+  },
+
+  // ==================== VERCEL BLOB IMAGE METHODS ====================
+
+  /**
+   * Upload image to Vercel Blob
+   */
+  async uploadImage(file, path) {
+    try {
+      return await vercelBlobService.uploadImage(file, path);
+    } catch (error) {
+      console.error('Error uploading image to Vercel Blob:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Upload multiple images to Vercel Blob
+   */
+  async uploadMultipleImages(files, folder = 'products') {
+    try {
+      return await vercelBlobService.uploadMultipleImages(files, folder);
+    } catch (error) {
+      console.error('Error uploading multiple images:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Delete image from Vercel Blob
+   */
+  async deleteImage(url) {
+    try {
+      return await vercelBlobService.deleteImage(url);
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get public URL (Vercel Blob URLs are already public)
+   */
+  getPublicUrl(path) {
+    return vercelBlobService.getPublicUrl(path);
+  },
+
+  // ==================== LEGACY COMPATIBILITY ====================
+
+  /**
+   * List images - deprecated method for Supabase compatibility
+   * Returns empty array since we use Firebase metadata now
+   */
+  async listImages(folder = 'products') {
+    console.warn('listImages is deprecated. Use getAllProducts() instead.');
+    return [];
   }
 };
 

@@ -13,11 +13,7 @@ export const firebaseConfig = {
   appId: "1:364632918810:web:1d16bf7738d2e723febaa3"
 };
 
-// Supabase configuration (database only)
-export const supabaseConfig = {
-  url: import.meta.env.VITE_SUPABASE_URL || 'https://fotcjsmnerawpqzhldhq.supabase.co',
-  anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdGNqc21uZXJhd3BxemhsZGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg1Mzg5MjYsImV4cCI6MjA2NDExNDkyNn0.cMIRbKVsw-gvOu53IaZzrABpngZ4O-hsMV7sWqLehK4'
-};
+// Supabase removed - using Firebase + Vercel Blob only
 
 // Vercel Blob configuration
 export const vercelBlobConfig = {
@@ -29,11 +25,7 @@ export const vercelBlobConfig = {
 export const databaseStatus = {
   firebase: {
     enabled: true,
-    purpose: 'Authentication and user data'
-  },
-  supabase: {
-    enabled: true,
-    purpose: 'Product database only'
+    purpose: 'Authentication, user data, and product database'
   },
   vercelBlob: {
     enabled: true,

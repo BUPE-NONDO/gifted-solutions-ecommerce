@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, X, Save, Trash2, RefreshCw } from 'lucide-react';
-import { vercelBlobService } from '../services/vercelBlobService';
+import { productService } from '../services/productService';
 import { firebaseMetadataService } from '../services/firebaseMetadataService';
 import { clearAllImages } from '../utils/clearAllImages';
 
@@ -31,7 +31,7 @@ const FreshAdminUpload = () => {
       console.log('📤 Uploading image to Vercel Blob...');
       
       // Upload to Vercel Blob
-      const uploadResult = await vercelBlobService.uploadImage(file, `products/${Date.now()}-${file.name}`);
+      const uploadResult = await productService.uploadImage(file, `products/${Date.now()}-${file.name}`);
       
       console.log('✅ Image uploaded to Vercel Blob:', uploadResult.url);
       
