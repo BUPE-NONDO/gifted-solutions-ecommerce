@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { useSiteSettings } from '../context/SiteSettingsContext';
-import supabaseService from '../services/supabase';
+import { productService } from '../services/productService';
 import { initializeDatabaseDirect } from '../utils/initializeDatabase';
 
 const SuperAdminDashboard = () => {
@@ -143,14 +143,14 @@ const SuperAdminDashboard = () => {
 
     setUploading(true);
     try {
-      const result = await supabaseService.uploadProductImage(file);
+      const result = await productService.uploadImage(file, `products/${Date.now()}-${file.name}`);
       
       if (type === 'product' && editingProduct) {
-        setEditingProduct({ ...editingProduct, image: result.publicUrl });
+        setEditingProduct({ ...editingProduct, image: result.url });
       } else if (type === 'new-product') {
-        setNewProduct({ ...newProduct, image: result.publicUrl });
+        setNewProduct({ ...newProduct, image: result.url });
       } else if (type === 'logo') {
-        setSiteSettings({ ...siteSettings, logo: result.publicUrl });
+        setSiteSettings({ ...siteSettings, logo: result.url });
       }
 
       setMessage({ type: 'success', text: 'Image uploaded successfully!' });

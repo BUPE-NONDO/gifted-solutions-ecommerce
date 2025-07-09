@@ -8,7 +8,7 @@ const VercelBlobImage = ({
   src,
   alt,
   className = '',
-  fallbackSrc = 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=400&fit=crop&crop=center',
+  fallbackSrc = '/placeholder-product.jpg', // Local placeholder only
   ...props
 }) => {
   const [imageSrc, setImageSrc] = useState('');

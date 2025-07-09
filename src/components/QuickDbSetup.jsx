@@ -54,57 +54,8 @@ const QuickDbSetup = () => {
         }
       }
 
-      // Create sample products
-      const sampleProducts = [
-        {
-          name: 'Arduino Uno R3',
-          description: 'The classic Arduino development board with USB cable',
-          category: 'Microcontrollers',
-          price: 650,
-          stock_quantity: 25,
-          featured: true,
-          specifications: {
-            "Microcontroller": "ATmega328P",
-            "Operating Voltage": "5V",
-            "Digital I/O Pins": "14"
-          },
-          features: ["USB connectivity", "Built-in LED", "Reset button"]
-        },
-        {
-          name: 'ESP32 Development Board',
-          description: 'WiFi and Bluetooth enabled microcontroller',
-          category: 'Microcontrollers',
-          price: 850,
-          stock_quantity: 15,
-          featured: true,
-          specifications: {
-            "Processor": "Dual-core",
-            "WiFi": "802.11 b/g/n",
-            "Bluetooth": "v4.2"
-          },
-          features: ["Built-in WiFi", "Bluetooth connectivity", "Dual-core processor"]
-        },
-        {
-          name: 'DHT22 Temperature Sensor',
-          description: 'High precision digital temperature and humidity sensor',
-          category: 'Sensors',
-          price: 120,
-          stock_quantity: 50,
-          specifications: {
-            "Temperature Range": "-40°C to 80°C",
-            "Humidity Range": "0-100% RH"
-          },
-          features: ["High accuracy", "Digital output", "Low power consumption"]
-        }
-      ];
-
-      for (const product of sampleProducts) {
-        try {
-          await productMetadataService.createProduct(product);
-        } catch (err) {
-          console.log(`Product ${product.name} might already exist`);
-        }
-      }
+      // No sample products - admin should use Fresh Start Upload instead
+      setResults(prev => [...prev, 'ℹ️ No sample products created. Use Fresh Start Upload in admin panel to add products with Vercel Blob images.']);
 
       setResults(prev => [...prev, '✅ Sample data inserted successfully']);
       setResults(prev => [...prev, '🎉 Database setup completed successfully!']);

@@ -229,7 +229,7 @@ const Home = () => {
       const randomImage = getRandomImageFromCategory(category.id);
       return {
         ...category,
-        image: randomImage?.publicUrl || `https://fotcjsmnerawpqzhldhq.supabase.co/storage/v1/object/public/product-images/products/arduino-uno-r3-1748603951988-impc78.jpg` // Fallback
+        image: randomImage?.publicUrl || '/placeholder-category.jpg' // Fallback to local placeholder
       };
     });
   };
