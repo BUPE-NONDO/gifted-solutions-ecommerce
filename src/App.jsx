@@ -32,22 +32,20 @@ import DatabaseInitializer from './components/DatabaseInitializer';
 import UnifiedImageManager from './components/UnifiedImageManager';
 import MobileImageTest from './components/MobileImageTest';
 import DatabaseTest from './components/DatabaseTest';
-import SupabaseImageSetup from './pages/SupabaseImageSetup';
-import DirectSupabaseCommands from './pages/DirectSupabaseCommands';
-import SupabaseSetup from './pages/SupabaseSetup';
+// Supabase imports removed - using Firebase + Vercel Blob only
 import ProductImageUploader from './components/ProductImageUploader';
 
 import CreateAdmin from './pages/CreateAdmin';
 import SafeLogin from './pages/SafeLogin';
 import SuperAdmin from './pages/SuperAdmin';
 import AdminErrorBoundary from './components/AdminErrorBoundary';
-import TestSupabaseOnly from './pages/TestSupabaseOnly';
+// TestSupabaseOnly removed
 import UpdateProductImages from './pages/UpdateProductImages';
 import UpdateAccurateImages from './pages/UpdateAccurateImages';
 import AutoUpdateImages from './pages/AutoUpdateImages';
 import ImageTools from './pages/ImageTools';
 import DeployWithRealImages from './pages/DeployWithRealImages';
-import CheckSupabaseImages from './pages/CheckSupabaseImages';
+// CheckSupabaseImages removed
 import ProductMetadataManager from './components/ProductMetadataManager';
 import ProductMetadataTest from './pages/ProductMetadataTest';
 import ImageMigrationPanel from './components/admin/ImageMigrationPanel';
@@ -528,11 +526,7 @@ function App() {
                     <DatabaseTest />
                   </AdminRoute>
                 } />
-                <Route path="/test-supabase-only" element={
-                  <AdminRoute>
-                    <TestSupabaseOnly />
-                  </AdminRoute>
-                } />
+                {/* TestSupabaseOnly route removed */}
                 <Route path="/update-product-images" element={
                   <AdminRoute>
                     <UpdateProductImages />
@@ -558,11 +552,7 @@ function App() {
                     <DeployWithRealImages />
                   </AdminRoute>
                 } />
-                <Route path="/check-supabase-images" element={
-                  <AdminRoute>
-                    <CheckSupabaseImages />
-                  </AdminRoute>
-                } />
+                {/* CheckSupabaseImages route removed */}
                 <Route path="/product-metadata-manager" element={
                   <AdminRoute>
                     <ProductMetadataManager />
@@ -594,21 +584,7 @@ function App() {
                     <UnifiedImageManager />
                   </AdminRoute>
                 } />
-                <Route path="/supabase-image-setup" element={
-                  <AdminRoute>
-                    <SupabaseImageSetup />
-                  </AdminRoute>
-                } />
-                <Route path="/direct-supabase-commands" element={
-                  <AdminRoute>
-                    <DirectSupabaseCommands />
-                  </AdminRoute>
-                } />
-                <Route path="/supabase-setup" element={
-                  <AdminRoute>
-                    <SupabaseSetup />
-                  </AdminRoute>
-                } />
+                {/* All Supabase setup routes removed */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 

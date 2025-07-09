@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Upload, RefreshCw, ImageIcon, Save, X, Edit, Star,
-  Package, Shield, Home, Database, AlertTriangle, Settings, Bot, Percent, Zap
+  Package, Shield, Home, Database, AlertTriangle, Settings, Bot, Percent, Zap, Trash2
 } from 'lucide-react';
 import QuickDbSetup from '../components/QuickDbSetup';
 import AdminSettings from '../components/AdminSettings';
@@ -9,6 +9,7 @@ import BulkDiscountManager from '../components/admin/BulkDiscountManager';
 import VercelImageUpload from '../components/admin/VercelImageUpload';
 import FreshAdminUpload from '../components/FreshAdminUpload';
 import firebaseMetadataService from '../services/firebaseMetadataService';
+import { clearAllFirebaseProducts } from '../utils/clearFirebaseProducts';
 
 const SuperAdmin = () => {
   // State management
@@ -17,8 +18,9 @@ const SuperAdmin = () => {
   const [loadingImages, setLoadingImages] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [testingFirebase, setTestingFirebase] = useState(false);
+  const [clearingProducts, setClearingProducts] = useState(false);
 
-  // Load images from Supabase on component mount
+  // Load products from Firebase on component mount
   useEffect(() => {
     loadImages();
 
@@ -70,7 +72,7 @@ const SuperAdmin = () => {
         console.log(`📊 Images with admin metadata: ${withMetadata}, without metadata: ${withoutMetadata}`);
       } else {
         setImages([]);
-        console.log('ℹ️ No images found in Supabase products folder');
+        console.log('ℹ️ No products found in Firebase');
       }
     } catch (error) {
       console.error('❌ Error loading WEBSITE images:', error);
@@ -93,6 +95,35 @@ const SuperAdmin = () => {
       alert(`❌ Firebase connection failed: ${error.message}`);
     } finally {
       setTestingFirebase(false);
+    }
+  };
+
+  const handleClearAllProducts = async () => {
+    const confirmed = window.confirm(
+      '⚠️ This will DELETE ALL products from Firebase!\n\n' +
+      'This action cannot be undone. All product data and metadata will be permanently removed.\n\n' +
+      'Are you sure you want to continue?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setClearingProducts(true);
+      console.log('🗑️ Clearing all products from Firebase...');
+
+      const result = await clearAllFirebaseProducts();
+
+      if (result.success) {
+        alert(`✅ Successfully cleared ${result.clearedCount} products from Firebase!\n\nReady for fresh uploads via Fresh Start Upload.`);
+        await loadImages(); // Refresh the display
+      } else {
+        alert(`❌ Failed to clear products: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('❌ Error clearing products:', error);
+      alert(`❌ Error clearing products: ${error.message}`);
+    } finally {
+      setClearingProducts(false);
     }
   };
 
@@ -221,6 +252,17 @@ const SuperAdmin = () => {
             >
               <Zap className="w-4 h-4 inline mr-2" />
               Fresh Start Upload
+            </button>
+            <button
+              onClick={() => setActiveTab('clear-products')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'clear-products'
+                  ? 'border-red-500 text-red-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Trash2 className="w-4 h-4 inline mr-2" />
+              Clear All Products
             </button>
             <button
               onClick={() => setActiveTab('upload')}
@@ -402,6 +444,57 @@ const SuperAdmin = () => {
         {activeTab === 'fresh-upload' && (
           <div>
             <FreshAdminUpload />
+          </div>
+        )}
+
+        {/* Clear All Products Tab */}
+        {activeTab === 'clear-products' && (
+          <div className="max-w-4xl mx-auto p-6">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <div className="flex items-center mb-4">
+                <Trash2 className="w-8 h-8 text-red-600 mr-3" />
+                <div>
+                  <h2 className="text-2xl font-bold text-red-800">Clear All Products</h2>
+                  <p className="text-red-600">Remove all products from Firebase database</p>
+                </div>
+              </div>
+
+              <div className="bg-white border border-red-200 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-red-800 mb-2">⚠️ Warning</h3>
+                <ul className="text-red-700 space-y-1 text-sm">
+                  <li>• This will permanently delete ALL products from Firebase</li>
+                  <li>• All product metadata, descriptions, and settings will be lost</li>
+                  <li>• Images in Vercel Blob storage will remain (for reuse)</li>
+                  <li>• This action cannot be undone</li>
+                  <li>• Use Fresh Start Upload to add new products after clearing</li>
+                </ul>
+              </div>
+
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <h3 className="font-semibold text-green-800 mb-2">✅ After Clearing</h3>
+                <p className="text-green-700 text-sm">
+                  Use the <strong>Fresh Start Upload</strong> tab to add new products with Vercel Blob images for fast loading.
+                </p>
+              </div>
+
+              <button
+                onClick={handleClearAllProducts}
+                disabled={clearingProducts}
+                className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-6 py-3 rounded-lg flex items-center font-semibold"
+              >
+                {clearingProducts ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                    Clearing Products...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-5 h-5 mr-2" />
+                    Clear All Products
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
 
