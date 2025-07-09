@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { ShoppingCart as CartIcon, Plus, Minus, Check, Eye, Star } from 'lucide-react';
 import RobustImage from './RobustImage';
 import { formatPrice, parsePrice } from '../utils/priceUtils';
+import { enhancedImageService } from '../services/enhancedImageService';
 
 const ProductCard = ({ product, onViewDetails }) => {
   const { addToCart, isInCart, getItemQuantity, updateQuantity } = useCart();
@@ -11,6 +12,10 @@ const ProductCard = ({ product, onViewDetails }) => {
 
   const inCart = isInCart(product.id);
   const quantity = getItemQuantity(product.id);
+
+  // Get optimized image URL for product card
+  const imageUrl = product.publicUrl || product.image;
+  const optimizedImageUrl = enhancedImageService.getProductCardUrl(imageUrl);
 
   const handleAddToCart = async () => {
     setIsAdding(true);
@@ -48,12 +53,16 @@ const ProductCard = ({ product, onViewDetails }) => {
     <div className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100 group">
       <div className="relative">
         <RobustImage
-          src={product.publicUrl || product.image}
+          src={optimizedImageUrl}
           alt={product.title || product.name}
           productName={product.title || product.name}
           category={product.category}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-          loading="lazy"
+          loading={enhancedImageService.isVercelBlobUrl(imageUrl) ? "eager" : "lazy"}
+          {...(enhancedImageService.isVercelBlobUrl(imageUrl) && {
+            srcSet: enhancedImageService.generateSrcSet(imageUrl),
+            sizes: "(max-width: 768px) 300px, 400px"
+          })}
         />
 
         {/* Featured Badge */}

@@ -9,6 +9,7 @@ import { formatPrice, parsePrice } from '../utils/priceUtils';
 import { SearchEmptyState, CategoryEmptyState } from '../components/EmptyState';
 import ProductMetadataList from '../components/ProductMetadataList';
 import BulkDiscountDisplay from '../components/BulkDiscountDisplay';
+import { enhancedImageService } from '../services/enhancedImageService';
 import {
   Search,
   Filter,
@@ -650,10 +651,15 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, onViewProduct }) => 
       {/* Image Container */}
       <div className="aspect-square bg-gray-100 dark:bg-gray-700 relative overflow-hidden p-4 transition-colors duration-200">
         <RobustImage
-          src={product.publicUrl || product.image}
+          src={enhancedImageService.getOptimizedUrl(product.publicUrl || product.image, { width: 400, height: 400 })}
           alt={product.title || product.name}
           className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
           fallbackType="electronics"
+          loading={enhancedImageService.isVercelBlobUrl(product.publicUrl || product.image) ? "eager" : "lazy"}
+          {...(enhancedImageService.isVercelBlobUrl(product.publicUrl || product.image) && {
+            srcSet: enhancedImageService.generateSrcSet(product.publicUrl || product.image),
+            sizes: "(max-width: 768px) 300px, 400px"
+          })}
         />
         {product.featured && (
           <div className="absolute top-2 left-2">
@@ -793,10 +799,11 @@ const ProductListItem = ({ product, onAddToCart, onViewDetails, onViewProduct })
         {/* Image */}
         <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0 p-2 transition-colors duration-200">
           <RobustImage
-            src={product.publicUrl || product.image}
+            src={enhancedImageService.getOptimizedUrl(product.publicUrl || product.image, { width: 96, height: 96 })}
             alt={product.title || product.name}
             className="w-full h-full object-contain"
             fallbackType="electronics"
+            loading={enhancedImageService.isVercelBlobUrl(product.publicUrl || product.image) ? "eager" : "lazy"}
           />
         </div>
 

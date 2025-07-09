@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import BulkDiscountDisplay from '../components/BulkDiscountDisplay';
+import { enhancedImageService } from '../services/enhancedImageService';
+import RobustImage from '../components/RobustImage';
 
 import {
   Search,
@@ -305,13 +307,17 @@ const Gallery = () => {
                 {/* Product Image */}
                 <div className="space-y-4">
                   <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
-                    <img
-                      src={selectedProduct.publicUrl || selectedProduct.image || '/placeholder-product.jpg'}
+                    <RobustImage
+                      src={enhancedImageService.getOptimizedUrl(selectedProduct.publicUrl || selectedProduct.image, { width: 600, height: 600 })}
                       alt={selectedProduct.title || selectedProduct.name}
+                      productName={selectedProduct.title || selectedProduct.name}
+                      category={selectedProduct.category}
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = '/placeholder-product.jpg';
-                      }}
+                      loading={enhancedImageService.isVercelBlobUrl(selectedProduct.publicUrl || selectedProduct.image) ? "eager" : "lazy"}
+                      {...(enhancedImageService.isVercelBlobUrl(selectedProduct.publicUrl || selectedProduct.image) && {
+                        srcSet: enhancedImageService.generateSrcSet(selectedProduct.publicUrl || selectedProduct.image),
+                        sizes: "(max-width: 768px) 400px, 600px"
+                      })}
                     />
                   </div>
 
@@ -464,13 +470,17 @@ const ProductCard = ({ image, onAddToCart, onViewProduct }) => {
 
       {/* Image Container - Full image fill */}
       <div className="aspect-square relative overflow-hidden">
-        <img
-          src={image.publicUrl}
+        <RobustImage
+          src={enhancedImageService.getOptimizedUrl(image.publicUrl, { width: 300, height: 300 })}
           alt={image.title || image.name}
+          productName={image.title || image.name}
+          category={image.category}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            e.target.style.display = 'none';
-          }}
+          loading={enhancedImageService.isVercelBlobUrl(image.publicUrl) ? "eager" : "lazy"}
+          {...(enhancedImageService.isVercelBlobUrl(image.publicUrl) && {
+            srcSet: enhancedImageService.generateSrcSet(image.publicUrl),
+            sizes: "(max-width: 768px) 250px, 300px"
+          })}
         />
 
         {/* Video Indicators */}

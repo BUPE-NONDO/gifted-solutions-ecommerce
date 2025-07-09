@@ -50,6 +50,7 @@ import DeployWithRealImages from './pages/DeployWithRealImages';
 import CheckSupabaseImages from './pages/CheckSupabaseImages';
 import ProductMetadataManager from './components/ProductMetadataManager';
 import ProductMetadataTest from './pages/ProductMetadataTest';
+import ImageMigrationPanel from './components/admin/ImageMigrationPanel';
 import ManualDatabaseSetup from './components/ManualDatabaseSetup';
 import Chatbot from './components/Chatbot';
 import ChatbotAdmin from './pages/ChatbotAdmin';
@@ -570,6 +571,11 @@ function App() {
                 <Route path="/product-metadata-test" element={
                   <AdminRoute>
                     <ProductMetadataTest />
+                  </AdminRoute>
+                } />
+                <Route path="/vercel-migration" element={
+                  <AdminRoute>
+                    <ImageMigrationPanel />
                   </AdminRoute>
                 } />
                 <Route path="/manual-database-setup" element={

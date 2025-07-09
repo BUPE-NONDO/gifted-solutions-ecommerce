@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ImageIcon } from 'lucide-react';
+import { enhancedImageService } from '../services/enhancedImageService';
 
 // Hardcoded fallback images - Base64 encoded or data URLs for offline reliability
 const fallbackImages = {
@@ -82,9 +83,22 @@ const RobustImage = ({
       return;
     }
 
-    // Ensure URL is in public format
-    const publicUrl = ensurePublicUrl(src);
-    setCurrentSrc(publicUrl);
+    // Use enhanced image service for URL processing if available
+    let processedUrl = src;
+    try {
+      // If it's already optimized by enhanced service, use as-is
+      if (src.includes('vercel-storage.com') || src.includes('?')) {
+        processedUrl = src;
+      } else {
+        // Ensure URL is in public format for non-optimized URLs
+        processedUrl = ensurePublicUrl(src);
+      }
+    } catch (error) {
+      console.warn('Error processing image URL:', error);
+      processedUrl = ensurePublicUrl(src);
+    }
+
+    setCurrentSrc(processedUrl);
     setIsLoading(true);
     setHasError(false);
     setRetryCount(0);

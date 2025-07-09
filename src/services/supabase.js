@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { vercelBlobService } from './vercelBlobService.js'
 
 // Supabase configuration from environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://fotcjsmnerawpqzhldhq.supabase.co'
@@ -623,57 +624,32 @@ class SupabaseService {
   // ==================== STORAGE METHODS ====================
 
   /**
-   * Upload image to Supabase Storage
+   * Upload image to Vercel Blob Storage
    */
   async uploadImage(file, path) {
     try {
-      const { data, error } = await supabase.storage
-        .from(this.bucket)
-        .upload(path, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-
-      if (error) throw error
-      return data
+      return await vercelBlobService.uploadImage(file, path);
     } catch (error) {
-      console.error('Error uploading image:', error)
+      console.error('Error uploading image to Vercel Blob:', error)
       throw error
     }
   }
 
   /**
-   * Get public URL for image (no CORS issues!)
+   * Get public URL for image (Vercel Blob URLs are already public)
    */
   getPublicUrl(path) {
-    if (!path) return null;
-
-    // Ensure the path starts with 'products/' if it's just a filename
-    const fullPath = path.startsWith('products/') ? path : `products/${path}`;
-
-    const { data } = supabase.storage
-      .from(this.bucket)
-      .getPublicUrl(fullPath)
-
-    // Log the generated URL for debugging
-    console.log(`Generated URL for ${path}:`, data.publicUrl);
-
-    return data.publicUrl
+    return vercelBlobService.getPublicUrl(path);
   }
 
   /**
-   * Delete image from storage
+   * Delete image from Vercel Blob storage
    */
   async deleteImage(path) {
     try {
-      const { error } = await supabase.storage
-        .from(this.bucket)
-        .remove([path])
-
-      if (error) throw error
-      return true
+      return await vercelBlobService.deleteImage(path);
     } catch (error) {
-      console.error('Error deleting image:', error)
+      console.error('Error deleting image from Vercel Blob:', error)
       throw error
     }
   }
@@ -750,7 +726,7 @@ class SupabaseService {
   }
 
   /**
-   * Upload multiple images at once
+   * Upload multiple images at once to Vercel Blob
    */
   async uploadMultipleImages(files, folder = 'uploads') {
     try {
@@ -762,7 +738,7 @@ class SupabaseService {
         const result = await this.uploadImage(file, filePath)
         return {
           ...result,
-          publicUrl: this.getPublicUrl(filePath),
+          publicUrl: result.fullPath, // Vercel Blob returns full URL
           fileName,
           originalName: file.name
         }
@@ -770,7 +746,7 @@ class SupabaseService {
 
       return await Promise.all(uploadPromises)
     } catch (error) {
-      console.error('Error uploading multiple images:', error)
+      console.error('Error uploading multiple images to Vercel Blob:', error)
       throw error
     }
   }

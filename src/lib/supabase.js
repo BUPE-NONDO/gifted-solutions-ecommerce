@@ -25,11 +25,17 @@ export const STORAGE_BUCKET = import.meta.env.VITE_STORAGE_BUCKET || 'product-im
 // Helper function to get public URL for uploaded files
 export const getPublicUrl = (filePath) => {
   if (!filePath) return null;
-  
+
+  // If it's already a full URL (Vercel Blob), return as is
+  if (filePath.startsWith('http')) {
+    return filePath;
+  }
+
+  // For legacy Supabase paths, try to construct URL
   const { data } = supabase.storage
     .from(STORAGE_BUCKET)
     .getPublicUrl(filePath);
-  
+
   return data?.publicUrl || null;
 };
 

@@ -3,27 +3,52 @@ import { put, del, list } from '@vercel/blob';
 
 class VercelBlobService {
   constructor() {
-    this.baseUrl = 'https://your-app.vercel.app'; // Will be updated after deployment
+    this.bucket = 'product-images'; // Default bucket name for compatibility
   }
 
   /**
    * Upload image to Vercel Blob storage
    * @param {File} file - Image file to upload
-   * @param {string} filename - Custom filename
-   * @returns {Promise<string>} - URL of uploaded image
+   * @param {string} path - Path including folder and filename
+   * @returns {Promise<Object>} - Upload result with URL and metadata
    */
-  async uploadImage(file, filename) {
+  async uploadImage(file, path) {
     try {
-      const blob = await put(filename, file, {
+      // Ensure path format is correct
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+
+      const blob = await put(cleanPath, file, {
         access: 'public',
         addRandomSuffix: true,
       });
-      
-      return blob.url;
+
+      return {
+        path: blob.pathname,
+        fullPath: blob.url,
+        url: blob.url,
+        size: blob.size
+      };
     } catch (error) {
       console.error('Error uploading to Vercel Blob:', error);
       throw new Error('Failed to upload image');
     }
+  }
+
+  /**
+   * Get public URL for image (Vercel Blob URLs are already public)
+   * @param {string} path - Image path or URL
+   * @returns {string} - Public URL
+   */
+  getPublicUrl(path) {
+    if (!path) return null;
+
+    // If it's already a full URL, return as is
+    if (path.startsWith('http')) {
+      return path;
+    }
+
+    // For legacy paths, return as is (they should be migrated)
+    return path;
   }
 
   /**
@@ -43,12 +68,20 @@ class VercelBlobService {
 
   /**
    * Delete image from Vercel Blob storage
-   * @param {string} url - Image URL to delete
+   * @param {string} path - Image path or URL to delete
    * @returns {Promise<boolean>} - Success status
    */
-  async deleteImage(url) {
+  async deleteImage(path) {
     try {
-      await del(url);
+      // If it's a full URL, use it directly
+      const urlToDelete = path.startsWith('http') ? path : null;
+
+      if (!urlToDelete) {
+        console.warn('Cannot delete image: invalid path or URL');
+        return false;
+      }
+
+      await del(urlToDelete);
       return true;
     } catch (error) {
       console.error('Error deleting from Vercel Blob:', error);
@@ -68,6 +101,35 @@ class VercelBlobService {
     } catch (error) {
       console.error('Error listing Vercel Blob images:', error);
       return [];
+    }
+  }
+
+  /**
+   * Upload multiple images at once
+   * @param {Array} files - Array of File objects
+   * @param {string} folder - Folder name
+   * @returns {Promise<Array>} - Array of upload results
+   */
+  async uploadMultipleImages(files, folder = 'uploads') {
+    try {
+      const uploadPromises = files.map(async (file, index) => {
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${folder}-${Date.now()}-${index}.${fileExt}`
+        const filePath = `${folder}/${fileName}`
+
+        const result = await this.uploadImage(file, filePath)
+        return {
+          ...result,
+          publicUrl: result.url, // Vercel Blob returns full URL
+          fileName,
+          originalName: file.name
+        }
+      })
+
+      return await Promise.all(uploadPromises)
+    } catch (error) {
+      console.error('Error uploading multiple images to Vercel Blob:', error)
+      throw error
     }
   }
 

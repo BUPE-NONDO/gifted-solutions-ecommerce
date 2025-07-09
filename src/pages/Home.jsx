@@ -6,6 +6,8 @@ import ProductVideo from '../components/ProductVideo';
 import ProductMetadataList from '../components/ProductMetadataList';
 import BulkDiscountDisplay from '../components/BulkDiscountDisplay';
 import cacheService from '../services/cacheService';
+import { enhancedImageService } from '../services/enhancedImageService';
+import RobustImage from '../components/RobustImage';
 import {
   Smartphone,
   Palette,
@@ -515,13 +517,17 @@ const Home = () => {
                   <div key={image.id} className="flex-none w-72">
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-200">
                       <div className="relative h-48 overflow-hidden">
-                        <img
-                          src={image.publicUrl || '/placeholder-product.jpg'}
+                        <RobustImage
+                          src={enhancedImageService.getOptimizedUrl(image.publicUrl, { width: 300, height: 300 })}
                           alt={image.title || image.name}
+                          productName={image.title || image.name}
+                          category={image.category}
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                          onError={(e) => {
-                            e.target.src = '/placeholder-product.jpg';
-                          }}
+                          loading={enhancedImageService.isVercelBlobUrl(image.publicUrl) ? "eager" : "lazy"}
+                          {...(enhancedImageService.isVercelBlobUrl(image.publicUrl) && {
+                            srcSet: enhancedImageService.generateSrcSet(image.publicUrl),
+                            sizes: "(max-width: 768px) 250px, 300px"
+                          })}
                         />
 
                         {/* Video Indicators */}
@@ -640,13 +646,13 @@ const Home = () => {
                   className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-primary-200"
                 >
                   <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={category.image}
+                    <RobustImage
+                      src={enhancedImageService.getOptimizedUrl(category.image, { width: 300, height: 192 })}
                       alt={category.name}
+                      productName={category.name}
+                      category={category.id}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -930,13 +936,17 @@ const ProductCard = ({ image, onAddToCart }) => {
 
       {/* Image Container - Full image fill */}
       <div className="aspect-square relative overflow-hidden">
-        <img
-          src={image.publicUrl}
+        <RobustImage
+          src={enhancedImageService.getOptimizedUrl(image.publicUrl, { width: 300, height: 300 })}
           alt={image.title || image.name}
+          productName={image.title || image.name}
+          category={image.category}
           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            e.target.style.display = 'none';
-          }}
+          loading={enhancedImageService.isVercelBlobUrl(image.publicUrl) ? "eager" : "lazy"}
+          {...(enhancedImageService.isVercelBlobUrl(image.publicUrl) && {
+            srcSet: enhancedImageService.generateSrcSet(image.publicUrl),
+            sizes: "(max-width: 768px) 250px, 300px"
+          })}
         />
 
         {/* Video Indicators */}
