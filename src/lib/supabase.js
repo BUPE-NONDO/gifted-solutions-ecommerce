@@ -8,35 +8,26 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Missing Supabase environment variables');
 }
 
-// Create Supabase client
+// Create Supabase client (database only - no storage)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-  },
-  storage: {
-    bucketId: import.meta.env.VITE_STORAGE_BUCKET || 'product-images'
   }
 });
 
-// Storage bucket name
-export const STORAGE_BUCKET = import.meta.env.VITE_STORAGE_BUCKET || 'product-images';
-
-// Helper function to get public URL for uploaded files
+// Helper function to get public URL for uploaded files (Vercel Blob URLs)
 export const getPublicUrl = (filePath) => {
   if (!filePath) return null;
 
-  // If it's already a full URL (Vercel Blob), return as is
+  // All images should now be Vercel Blob URLs (full URLs)
   if (filePath.startsWith('http')) {
     return filePath;
   }
 
-  // For legacy Supabase paths, try to construct URL
-  const { data } = supabase.storage
-    .from(STORAGE_BUCKET)
-    .getPublicUrl(filePath);
-
-  return data?.publicUrl || null;
+  // Log warning for any non-URL paths
+  console.warn('Non-URL image path detected:', filePath);
+  return null;
 };
 
 // Helper function to upload file

@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import supabaseStorage from '../services/supabase';
 
 /**
- * Supabase Image Component - No CORS Issues!
+ * Vercel Blob Image Component - Fast CDN Loading!
  * Automatically handles image loading with fallbacks
  */
-const SupabaseImage = ({ 
-  src, 
-  alt, 
-  className = '', 
+const VercelBlobImage = ({
+  src,
+  alt,
+  className = '',
   fallbackSrc = 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=400&fit=crop&crop=center',
-  ...props 
+  ...props
 }) => {
   const [imageSrc, setImageSrc] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -23,24 +22,18 @@ const SupabaseImage = ({
       return;
     }
 
-    // Check if it's already a full URL
+    // All images should now be Vercel Blob URLs (full URLs)
     if (src.startsWith('http')) {
       setImageSrc(src);
       setIsLoading(false);
       return;
     }
 
-    // Get Supabase public URL (no CORS issues!)
-    try {
-      const publicUrl = supabaseStorage.getPublicUrl(src);
-      setImageSrc(publicUrl);
-      setIsLoading(false);
-    } catch (error) {
-      console.warn('Error getting Supabase URL:', error);
-      setImageSrc(fallbackSrc);
-      setIsLoading(false);
-      setHasError(true);
-    }
+    // Fallback for any non-URL paths
+    console.warn('Non-URL image path detected:', src, 'Using fallback');
+    setImageSrc(fallbackSrc);
+    setIsLoading(false);
+    setHasError(true);
   }, [src, fallbackSrc]);
 
   const handleImageError = () => {
@@ -79,4 +72,4 @@ const SupabaseImage = ({
   );
 };
 
-export default SupabaseImage;
+export default VercelBlobImage;

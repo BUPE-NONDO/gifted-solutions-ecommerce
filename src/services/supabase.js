@@ -730,25 +730,20 @@ class SupabaseService {
    */
   async uploadMultipleImages(files, folder = 'uploads') {
     try {
-      const uploadPromises = files.map(async (file, index) => {
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${folder}-${Date.now()}-${index}.${fileExt}`
-        const filePath = `${folder}/${fileName}`
-
-        const result = await this.uploadImage(file, filePath)
-        return {
-          ...result,
-          publicUrl: result.fullPath, // Vercel Blob returns full URL
-          fileName,
-          originalName: file.name
-        }
-      })
-
-      return await Promise.all(uploadPromises)
+      return await vercelBlobService.uploadMultipleImages(files, folder);
     } catch (error) {
       console.error('Error uploading multiple images to Vercel Blob:', error)
       throw error
     }
+  }
+
+  /**
+   * List images - now returns empty array since we use Vercel Blob
+   * Images are managed through Firebase metadata
+   */
+  async listImages(folder = 'products') {
+    console.warn('listImages called - this method is deprecated. Use Firebase metadata service instead.');
+    return [];
   }
 
   /**

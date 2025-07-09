@@ -46,47 +46,37 @@ const Shop = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProductModal, setShowProductModal] = useState(false);
 
-  // Load images with Firebase metadata (same as Home page)
+  // Load images with Firebase metadata (using Vercel Blob URLs)
   useEffect(() => {
     const loadImagesWithMetadata = async () => {
       setMetadataLoading(true);
       try {
         console.log('🔄 Loading images with admin metadata from Firebase for Shop...');
 
-        const { default: supabaseService } = await import('../services/supabase');
+        // Load product metadata directly from Firebase (no Supabase storage calls)
+        const { default: firebaseMetadataService } = await import('../services/firebaseMetadataService');
 
-        // Load images from the products folder
-        const imageList = await supabaseService.listImages('products');
+        // Get all products with metadata from Firebase
+        const productsWithMetadata = await firebaseMetadataService.getAllProducts();
 
-        if (imageList && imageList.length > 0) {
-          // Only load images that have admin-added metadata in Firebase
+        if (productsWithMetadata && productsWithMetadata.length > 0) {
+          // Filter products that have valid Vercel Blob URLs
           const imagesWithMetadata = [];
 
-          for (const image of imageList) {
-            const publicUrl = supabaseService.getPublicUrl(`products/${image.name}`);
-
-            // Try to load metadata from Firebase
-            let metadata = null;
-            try {
-              metadata = await firebaseMetadataService.getImageMetadata(image.name);
-            } catch (error) {
-              console.log(`No Firebase metadata for ${image.name}`);
-            }
-
-            // ONLY include images with admin-added metadata
-            if (metadata && metadata.title && metadata.title.trim()) {
+          for (const product of productsWithMetadata) {
+            // Only include products with valid data and Vercel Blob URLs
+            if (product.title && product.title.trim() && product.image) {
               const imageWithMetadata = {
-                ...image,
-                id: image.name.replace(/\.[^/.]+$/, ""), // Remove file extension for ID
-                publicUrl,
-                fullPath: `products/${image.name}`,
-                title: metadata.title,
-                name: metadata.title, // For compatibility
-                description: metadata.description || '',
-                category: metadata.category || '',
-                price: metadata.price || null,
-                inStock: metadata.in_stock !== false,
-                featured: metadata.featured || false,
+                id: product.id,
+                publicUrl: product.image, // This should be a Vercel Blob URL
+                image: product.image,
+                title: product.title,
+                name: product.title, // For compatibility
+                description: product.description || '',
+                category: product.category || '',
+                price: product.price || null,
+                inStock: product.in_stock !== false,
+                featured: product.featured || false,
                 hasMetadata: true
               };
 
@@ -95,11 +85,10 @@ const Shop = () => {
           }
 
           setMetadataProducts(imagesWithMetadata);
-          console.log(`✅ Loaded ${imagesWithMetadata.length} images with admin metadata from Firebase for Shop`);
-          console.log(`ℹ️ Filtered out ${imageList.length - imagesWithMetadata.length} images without admin metadata`);
+          console.log(`✅ Loaded ${imagesWithMetadata.length} products with Vercel Blob URLs from Firebase for Shop`);
         } else {
           setMetadataProducts([]);
-          console.log('ℹ️ No images found in Supabase storage');
+          console.log('ℹ️ No products found in Firebase');
         }
 
         setMetadataError(null);
