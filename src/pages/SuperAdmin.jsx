@@ -7,6 +7,7 @@ import QuickDbSetup from '../components/QuickDbSetup';
 import AdminSettings from '../components/AdminSettings';
 import BulkDiscountManager from '../components/admin/BulkDiscountManager';
 import VercelImageUpload from '../components/admin/VercelImageUpload';
+import FreshAdminUpload from '../components/FreshAdminUpload';
 import firebaseMetadataService from '../services/firebaseMetadataService';
 
 const SuperAdmin = () => {
@@ -226,6 +227,17 @@ const SuperAdmin = () => {
               All Website Images
             </button>
             <button
+              onClick={() => setActiveTab('fresh-upload')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'fresh-upload'
+                  ? 'border-green-500 text-green-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Zap className="w-4 h-4 inline mr-2" />
+              Fresh Start Upload
+            </button>
+            <button
               onClick={() => setActiveTab('upload')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'upload'
@@ -234,7 +246,7 @@ const SuperAdmin = () => {
               }`}
             >
               <Upload className="w-4 h-4 inline mr-2" />
-              Upload Images
+              Legacy Upload
             </button>
             <button
               onClick={() => setActiveTab('database')}
@@ -398,6 +410,13 @@ const SuperAdmin = () => {
               </div>
             )}
             </div>
+          </div>
+        )}
+
+        {/* Fresh Upload Tab */}
+        {activeTab === 'fresh-upload' && (
+          <div>
+            <FreshAdminUpload />
           </div>
         )}
 

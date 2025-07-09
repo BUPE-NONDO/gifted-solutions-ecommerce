@@ -102,7 +102,7 @@ const Home = () => {
         console.log(`✅ Loaded ${imagesWithMetadata.length} products with Vercel Blob URLs from Firebase for Home`);
       } else {
         setImages([]);
-        console.log('ℹ️ No products found in Firebase');
+        console.log('ℹ️ No products found in Firebase - admin needs to upload products');
       }
     } catch (err) {
       console.error('❌ Error loading images for Home:', err);
