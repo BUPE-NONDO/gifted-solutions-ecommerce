@@ -1,6 +1,6 @@
 # Gifted Solutions - Premium eCommerce Platform
 
-A full-featured eCommerce website built with React.js, TypeScript, and Firebase, featuring a secure admin panel and dynamic user shopping interface with green and black theme design.
+A full-featured eCommerce website built with React.js, Firebase, and Vercel Blob, featuring a secure admin panel and dynamic user shopping interface with green and black theme design. Optimized for fast image loading with global CDN delivery.
 
 ## 🚀 Features
 
@@ -12,7 +12,7 @@ A full-featured eCommerce website built with React.js, TypeScript, and Firebase,
   - Individual Products and Services with:
     - Title, Description, Category, Tags
     - Price, Stock Status
-    - Image uploads to Firebase Storage
+    - Image uploads to Vercel Blob Storage (fast CDN delivery)
     - Visibility toggle (Show/Hide from store)
   - User Uploaded Requests management
 - Dashboard with analytics (Total Sales, Products in Stock, Orders, Requests)
@@ -33,7 +33,7 @@ A full-featured eCommerce website built with React.js, TypeScript, and Firebase,
 - Firebase App Check integration ready
 - Role-based authentication and route protection
 - Input sanitization and XSS prevention
-- Secure image storage with Firebase Storage
+- Secure image storage with Vercel Blob (global CDN)
 - HTTPS enforcement and CORS protection
 
 ### 🎨 Design & UI/UX
@@ -46,7 +46,7 @@ A full-featured eCommerce website built with React.js, TypeScript, and Firebase,
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React.js 19** with TypeScript
+- **React.js 18** with modern hooks
 - **Vite** for fast development and building
 - **React Router** for navigation
 - **React Hook Form** for form management
@@ -55,10 +55,17 @@ A full-featured eCommerce website built with React.js, TypeScript, and Firebase,
 
 ### Backend/Services
 - **Firebase Authentication** for user management
-- **Firestore** for database
-- **Firebase Storage** for file uploads
-- **Firebase Hosting** for deployment
+- **Firebase Firestore** for database and product metadata
+- **Vercel Blob Storage** for fast image storage and CDN delivery
+- **Vercel** for deployment and hosting
 - **Firebase Functions** (ready for implementation)
+
+### Architecture Highlights
+- **🚀 Fast Image Loading**: Vercel Blob CDN for global image delivery
+- **🔥 Real-time Database**: Firebase Firestore for instant updates
+- **🛡️ Secure Authentication**: Firebase Auth with role-based access
+- **📱 Responsive Design**: Mobile-first approach with Tailwind CSS
+- **⚡ Optimized Performance**: Vite build system and modern React
 
 ### Development Tools
 - TypeScript for type safety
@@ -116,10 +123,11 @@ A full-featured eCommerce website built with React.js, TypeScript, and Firebase,
    npm install
    ```
 
-3. **Firebase Setup**
+3. **Firebase + Vercel Setup**
    - Create a Firebase project at https://console.firebase.google.com
-   - Enable Authentication, Firestore, and Storage
-   - Copy your Firebase config and update `src/services/firebase.ts`
+   - Enable Authentication and Firestore
+   - Copy your Firebase config and update `src/services/firebase.js`
+   - Deploy to Vercel and enable Blob Storage in Vercel dashboard
 
 4. **Start development server**
    ```bash
@@ -129,19 +137,21 @@ A full-featured eCommerce website built with React.js, TypeScript, and Firebase,
 5. **Open browser**
    Navigate to `http://localhost:3000`
 
-### Firebase Configuration
+### Environment Configuration
 
-Update `src/services/firebase.ts` with your Firebase project credentials:
+Create a `.env` file with your Firebase and Vercel Blob credentials:
 
-```typescript
-const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "your-app-id"
-};
+```bash
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+
+# Vercel Blob Storage
+BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
 ```
 
 ## 🔧 Available Scripts
@@ -154,9 +164,10 @@ const firebaseConfig = {
 
 ### Immediate Implementation
 1. **Firebase Setup**: Configure your Firebase project and update credentials
-2. **Admin User**: Create first admin user in Firebase Console
-3. **Product Data**: Add initial product categories and items
-4. **Testing**: Test authentication and basic functionality
+2. **Vercel Deployment**: Deploy to Vercel and enable Blob Storage
+3. **Admin User**: Create first admin user in Firebase Console
+4. **Fresh Start Upload**: Use the admin panel to upload products with Vercel Blob images
+5. **Testing**: Test authentication and fast image loading
 
 ### Advanced Features (Ready for Implementation)
 1. **Payment Integration**: Stripe/PayPal checkout

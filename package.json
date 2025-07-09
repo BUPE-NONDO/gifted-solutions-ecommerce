@@ -1,7 +1,8 @@
 {
   "name": "gifted-solutions",
+  "description": "Premium eCommerce platform built with React, Firebase, and Vercel Blob for fast global image delivery",
   "private": true,
-  "version": "0.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
