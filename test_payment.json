@@ -1,0 +1,7 @@
+{
+  "amount": 100,
+  "phone_number": "260123456789",
+  "order_id": "TEST-123",
+  "customer_name": "Test User",
+  "currency": "EUR"
+}
